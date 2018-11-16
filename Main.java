@@ -16,67 +16,104 @@ public class Main {
 
     private static final int numItems = 100000;
     private static final int startLevel = 0;
+    private static List<Integer> slotLevels;
+    private static final Random rand = new Random();
 
     public static void main(String[] args) {
+        resetSlotLevels();
+
         List<Integer> nums = new ArrayList<>();
         for(int i = 0; i < numItems; i++) {
-            nums.add(howManyTo300(startLevel));
+            nums.add(howManyTo300());
+            resetSlotLevels();
         }
         System.out.println("Items Mean Value   : " + mean(nums));
         System.out.println("Items Median Value : " + median(nums));
 
         nums = new ArrayList<>();
         for(int i = 0; i < numItems; i++) {
-            nums.add(howManyBoxesTo300(startLevel));
+            nums.add(howManyBoxesTo300());
+            resetSlotLevels();
         }
         System.out.println("Boxes Mean Value   : " + mean(nums));
         System.out.println("Boxes Median Value : " + median(nums));
     }
 
     /**
+     * Resets the values of slotLevels
+     * to startLevel.
+     */
+    private static void resetSlotLevels() {
+        slotLevels = new ArrayList<>();
+        for(int i = 0; i < 5; i++) slotLevels.add(startLevel);
+    }
+
+    /**
      * Determines the number of items needed
      * to reach 300 using randomized changes.
      *
+     * @modifies slotLevels
      * @param start is not null, the initial power level.
      * @return the number of items needed to reach
-     *          power level 300.
+     *          power level 300 across all 5 slots.
      */
-    private static int howManyTo300(int start) {
-        Random rand = new Random();
+    private static int howManyTo300() {
         int dP = (int)(rand.nextFloat() * 21.0) - 10;
-        if(dP <= 0)
-            return 1 + howManyTo300(start);
-        else if (start + dP >= 300)
+        int slot = (int)(rand.nextFloat() * 5.0);
+        if(dP > 0) {
+            slotLevels.set(slot, slotLevels.get(slot) + dP);
+            if(slotLevels.get(slot) > 300)
+                slotLevels.set(slot, 300);
+        }
+        double average = mean(slotLevels);
+        if(average >= 300.0)
             return 1;
         else
-            return 1 + howManyTo300(start + dP);
+            return 1 + howManyTo300();
     }
 
     /**
      * Determines the number of boxes needed
      * to reach 300 using randomized changes.
-     * Each box contains 3 items, which operate on the 
-     * same initial power level.
+     * Each box contains 3 items, which operate on the
+     * same initial power level across all slots.
+     * These items are assigned random item slots. (1-5)
+     * The maximum powered item in each slot gotten
+     * from the box overwrites the previous
+     * maximum power in that slot (assuming this
+     * item is more powerful than the previous
+     * maximum power level in that slot).
      *
+     * @modifies slotLevels
      * @param start is not null, the initial power level.
      * @return the number of boxes needed to reach
      *          power level 300.
      */
-    private static int howManyBoxesTo300(int start) {
-        Random rand = new Random();
-        int dP = (int)
-                (findMax(rand.nextFloat(), rand.nextFloat(), rand.nextFloat())
-                        * 21.0) - 10;
-        if(dP <= 0)
-            return 1 + howManyBoxesTo300(start);
-        else if (start + dP >= 300)
+    private static int howManyBoxesTo300() {
+        Map<Integer, Integer> changeMap = new HashMap<>();
+        for(int i = 0; i < 3; i++) {
+            int slot = (int)(rand.nextFloat() * 5.0);
+            int dP = (int)(rand.nextFloat() * 21.0) - 10;
+            if(changeMap.containsKey(slot)) {
+                int d2 = changeMap.get(slot);
+                changeMap.put(slot, dP > d2 ? dP : d2);
+            } else {
+                changeMap.put(slot, dP);
+            }
+        }
+        for(Integer slot : changeMap.keySet()) {
+            int dP = changeMap.get(slot);
+            if(dP > 0) {
+                slotLevels.set(slot, slotLevels.get(slot) + dP);
+                if(slotLevels.get(slot) > 300)
+                    slotLevels.set(slot, 300);
+            }
+        }
+        double average = mean(slotLevels);
+        if(average >= 300.0)
             return 1;
         else
-            return 1 + howManyBoxesTo300(start + dP);
-    }
-
-    private static double findMax(double a, double b, double c) {
-        return a > (b > c ? b : c) ? a : (b > c ? b : c);
+            return 1 + howManyBoxesTo300();
     }
 
     /**
