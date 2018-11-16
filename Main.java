@@ -22,8 +22,15 @@ public class Main {
         for(int i = 0; i < numItems; i++) {
             nums.add(howManyTo300(startLevel));
         }
-        System.out.println("Mean Value   : " + mean(nums));
-        System.out.println("Median Value : " + median(nums));
+        System.out.println("Items Mean Value   : " + mean(nums));
+        System.out.println("Items Median Value : " + median(nums));
+
+        nums = new ArrayList<>();
+        for(int i = 0; i < numItems; i++) {
+            nums.add(howManyBoxesTo300(startLevel));
+        }
+        System.out.println("Boxes Mean Value   : " + mean(nums));
+        System.out.println("Boxes Median Value : " + median(nums));
     }
 
     /**
@@ -43,6 +50,33 @@ public class Main {
             return 1;
         else
             return 1 + howManyTo300(start + dP);
+    }
+
+    /**
+     * Determines the number of boxes needed
+     * to reach 300 using randomized changes.
+     * Each box contains 3 items, which operate on the 
+     * same initial power level.
+     *
+     * @param start is not null, the initial power level.
+     * @return the number of boxes needed to reach
+     *          power level 300.
+     */
+    private static int howManyBoxesTo300(int start) {
+        Random rand = new Random();
+        int dP = (int)
+                (findMax(rand.nextFloat(), rand.nextFloat(), rand.nextFloat())
+                        * 21.0) - 10;
+        if(dP <= 0)
+            return 1 + howManyBoxesTo300(start);
+        else if (start + dP >= 300)
+            return 1;
+        else
+            return 1 + howManyBoxesTo300(start + dP);
+    }
+
+    private static double findMax(double a, double b, double c) {
+        return a > (b > c ? b : c) ? a : (b > c ? b : c);
     }
 
     /**
