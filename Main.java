@@ -9,7 +9,7 @@ import java.util.Random;
 
 /*
  * Author: (Github uName) thisTyler
- *         (Reddit uName) Nightscythe1847
+ *
  * November 15 2018
  */
 public class Main {
